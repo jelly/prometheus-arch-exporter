@@ -17,3 +17,7 @@ python prometheus-arch-exporter.py
 ```
 
 The default port is 9097, visit metrics in [localhost:9097/](http://localhost:9097/)
+
+## Systemd
+
+A systemd service is available with hardening options enabled.

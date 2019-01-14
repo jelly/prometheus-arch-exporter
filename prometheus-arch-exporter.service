@@ -1,0 +1,19 @@
+[Unit]
+Description=prometheus arch exporter
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/python /usr/bin/prometheus-arch-exporter.py
+DynamicUser=true
+ProtectHome=true
+NoNewPrivileges=true
+RestrictNamespaces=yes
+RestrictRealtime=yes
+ProtectKernelModules=true
+ProtectKernelTunables=true
+LockPersonality=true
+MemoryDenyWriteExecute=yes
+
+[Install]
+WantedBy=multi-user.target
