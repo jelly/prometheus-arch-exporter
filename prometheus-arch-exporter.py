@@ -1,9 +1,15 @@
 #!/usr/bin/python
 
+import argparse
+import logging
+
 from time import sleep
 from subprocess import check_output
 
 from prometheus_client import start_http_server, Metric, REGISTRY
+
+
+PORT = 9097
 
 
 class ArchCollector(object):
@@ -23,8 +29,17 @@ class ArchCollector(object):
         yield metric
 
 
-if __name__ == "__main__":
-    start_http_server(9097)
+def main():
+    parser = argparse.ArgumentParser(description='Arch Linux exporter for Prometheus')
+    parser.add_argument('-p', '--port', help=f'exporter exposed port (default {PORT})', type=int, default=PORT)
+    args = parser.parse_args()
+
+    start_http_server(args.port)
     REGISTRY.register(ArchCollector())
+
     while True:
         sleep(60)
+
+
+if __name__ == "__main__":
+    main()
