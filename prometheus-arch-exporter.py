@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-import time
+from time import sleep
 from subprocess import check_output
 
 from prometheus_client import start_http_server, Metric, REGISTRY
@@ -27,4 +27,4 @@ if __name__ == "__main__":
     start_http_server(9097)
     REGISTRY.register(ArchCollector())
     while True:
-        time.sleep(10)
+        sleep(60)
