@@ -38,7 +38,7 @@ def main():
 
     try:
         while True:
-            sleep(60)
+            sleep(10)
     except KeyboardInterrupt:
         pass
 
