@@ -2,7 +2,6 @@
 
 import argparse
 
-from time import sleep
 from subprocess import check_output
 from wsgiref.simple_server import make_server
 
