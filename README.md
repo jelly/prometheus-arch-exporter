@@ -1,5 +1,6 @@
 # prometheus-arch-exporter
-Prometheus Arch Linux Exporter
+
+This Prometheus exporter collects Arch Linux specific metrics such as out of date packages and the amount of vulnerable packages.
 
 ## Dependencies
 
@@ -7,3 +8,12 @@ Prometheus Arch Linux Exporter
 * python-prometheus_client
 * arch-audit
 * pyalpm
+
+## Usage
+
+Run the exporter
+```bash
+python prometheus-arch-exporter.py
+```
+
+The default port is 9097, visit metrics in [localhost:9097/](http://localhost:9097/)
