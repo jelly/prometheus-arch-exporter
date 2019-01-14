@@ -1,7 +1,6 @@
 #!/usr/bin/python
 
 import argparse
-import logging
 
 from time import sleep
 from subprocess import check_output
