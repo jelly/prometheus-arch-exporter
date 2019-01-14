@@ -4,8 +4,9 @@ import argparse
 
 from time import sleep
 from subprocess import check_output
+from wsgiref.simple_server import make_server
 
-from prometheus_client import start_http_server, Metric, REGISTRY
+from prometheus_client import make_wsgi_app, Metric, REGISTRY
 
 
 PORT = 9097
@@ -33,14 +34,11 @@ def main():
     parser.add_argument('-p', '--port', help=f'exporter exposed port (default {PORT})', type=int, default=PORT)
     args = parser.parse_args()
 
-    start_http_server(args.port)
     REGISTRY.register(ArchCollector())
 
-    try:
-        while True:
-            sleep(10)
-    except KeyboardInterrupt:
-        pass
+    app = make_wsgi_app()
+    httpd = make_server('', args.port, app)
+    httpd.serve_forever()
 
 
 if __name__ == "__main__":
