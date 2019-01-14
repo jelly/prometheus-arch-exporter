@@ -13,7 +13,6 @@ RestrictRealtime=yes
 ProtectKernelModules=true
 ProtectKernelTunables=true
 LockPersonality=true
-MemoryDenyWriteExecute=yes
 
 [Install]
 WantedBy=multi-user.target
