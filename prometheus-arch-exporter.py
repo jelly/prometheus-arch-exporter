@@ -37,8 +37,11 @@ def main():
     start_http_server(args.port)
     REGISTRY.register(ArchCollector())
 
-    while True:
-        sleep(60)
+    try:
+        while True:
+            sleep(60)
+    except KeyboardInterrupt:
+        pass
 
 
 if __name__ == "__main__":
