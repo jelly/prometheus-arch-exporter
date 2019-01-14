@@ -5,3 +5,5 @@ Prometheus Arch Linux Exporter
 
 * python3
 * python-prometheus_client
+* arch-audit
+* pacman-contrib
