@@ -2,20 +2,59 @@
 
 import argparse
 
+from os import symlink
+from shutil import rmtree
+from tempfile import mkdtemp
 from subprocess import check_output
 from wsgiref.simple_server import make_server
 
 from prometheus_client import make_wsgi_app, Metric, REGISTRY
 
+from pyalpm import sync_newversion
+from pycman.config import init_with_config_and_options
+
 
 PORT = 9097
+
+
+class PacmanConf:
+    dbpath = None
+    config = '/etc/pacman.conf'
+    root = None
+    gpgdir = None
+    arch = None
+    logfile = None
+    cachedir = None
+    debug = None
+
+
+def checkupdates():
+    count = 0
+    options = PacmanConf()
+    tempdir = mkdtemp(dir='/tmp')
+    options.dbpath = tempdir
+    symlink('/var/lib/pacman/local', f'{tempdir}/local')
+
+    # Workaround for passing a different DBPath but with the system pacman.conf
+    handle = init_with_config_and_options(options)
+    for db in handle.get_syncdbs():
+        db.update(False)
+
+    db = handle.get_localdb()
+    for pkg in db.pkgcache:
+        if sync_newversion(pkg, handle.get_syncdbs()) is None:
+            continue
+        count += 1
+
+    rmtree(tempdir)
+
+    return count
 
 
 class ArchCollector(object):
 
     def collect(self):
-        packages = len(check_output('checkupdates').split(b'->'))
-
+        packages = checkupdates()
         metric = Metric('arch_checkupdates', 'Arch Linux Packages out of date', 'gauge')
         metric.add_sample('arch_checkupdates', value=(packages), labels={})
         yield metric
