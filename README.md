@@ -6,8 +6,8 @@ This Prometheus exporter collects Arch Linux specific metrics such as out of dat
 
 * python3
 * python-prometheus_client
-* arch-audit
 * pyalpm
+* requests
 
 ## Usage
 

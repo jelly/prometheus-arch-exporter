@@ -8,10 +8,12 @@ from tempfile import mkdtemp
 from subprocess import check_output
 from wsgiref.simple_server import make_server
 
+import requests
+
 from prometheus_client import make_wsgi_app, Metric, REGISTRY
 
-from pyalpm import sync_newversion
-from pycman.config import init_with_config_and_options
+from pyalpm import sync_newversion, vercmp
+from pycman.config import init_with_config_and_options, init_with_config
 
 
 PORT = 9097
@@ -51,6 +53,37 @@ def checkupdates():
     return count
 
 
+def vulernablepackges():
+    count = 0
+    handle = init_with_config('/etc/pacman.conf')
+    db = handle.get_localdb()
+
+    # XXX: error handling
+    r = requests.get('https://security.archlinux.org/issues.json')
+    advisories = r.json()
+    for adv in advisories:
+        version = adv['fixed']
+        packages = adv['packages']
+
+        if not version:
+            continue
+
+        if not any(db.get_pkg(pkg) for pkg in packages):
+            continue
+
+        for pkg in packages:
+            alpm_pkg = db.get_pkg(pkg)
+
+            if not alpm_pkg:
+                continue
+
+            if vercmp(version, alpm_pkg.version) > 0:
+                count += 1
+
+        return count
+
+
+
 class ArchCollector(object):
 
     def collect(self):
@@ -59,8 +92,7 @@ class ArchCollector(object):
         metric.add_sample('arch_checkupdates', value=(packages), labels={})
         yield metric
 
-        arch_audit_text = check_output(['arch-audit', '-u'])
-        security_issues = len([line for line in arch_audit_text.splitlines()[:-1] if 'from testing repos' not in line])
+        security_issues = vulernablepackges()
 
         metric = Metric('arch_audit', 'Arch Audit Packages', 'gauge')
         metric.add_sample('arch_audit', value=(security_issues), labels={})
