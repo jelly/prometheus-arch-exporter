@@ -7,6 +7,7 @@ from shutil import rmtree
 from tempfile import mkdtemp
 from subprocess import check_output
 from wsgiref.simple_server import make_server
+import gc
 
 import requests
 
@@ -31,25 +32,30 @@ class PacmanConf:
     debug = None
 
 
+def get_mem():
+	import resource
+	return resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
+
+
 def checkupdates():
     count = 0
     options = PacmanConf()
-    tempdir = mkdtemp(dir='/tmp')
-    options.dbpath = tempdir
-    symlink('/var/lib/pacman/local', f'{tempdir}/local')
+    #tempdir = mkdtemp(dir='/tmp')
+    #options.dbpath = tempdir
+    #symlink('/var/lib/pacman/local', f'{tempdir}/local')
 
     # Workaround for passing a different DBPath but with the system pacman.conf
     handle = init_with_config_and_options(options)
-    for db in handle.get_syncdbs():
-        db.update(False)
+    #for db in handle.get_syncdbs():
+    #    db.update(False)
 
-    db = handle.get_localdb()
-    for pkg in db.pkgcache:
-        if sync_newversion(pkg, handle.get_syncdbs()) is None:
-            continue
-        count += 1
+    #db = handle.get_localdb()
+    #for pkg in db.pkgcache:
+    #    if sync_newversion(pkg, handle.get_syncdbs()) is None:
+    #        continue
+    #    count += 1
 
-    rmtree(tempdir)
+    #rmtree(tempdir)
 
     return count
 
@@ -89,16 +95,20 @@ def vulernablepackges():
 class ArchCollector(object):
 
     def collect(self):
+        gc.collect()
+        print("memory (after gc): ", get_mem())
         packages = checkupdates()
+        gc.collect()
+        print("memory (after gc): ", get_mem())
         metric = Metric('arch_checkupdates', 'Arch Linux Packages out of date', 'gauge')
         metric.add_sample('arch_checkupdates', value=(packages), labels={})
         yield metric
 
-        security_issues = vulernablepackges()
+        #security_issues = vulernablepackges()
 
-        metric = Metric('arch_audit', 'Arch Audit Packages', 'gauge')
-        metric.add_sample('arch_audit', value=(security_issues), labels={})
-        yield metric
+        #metric = Metric('arch_audit', 'Arch Audit Packages', 'gauge')
+        #metric.add_sample('arch_audit', value=(security_issues), labels={})
+        #yield metric
 
 
 def main():
