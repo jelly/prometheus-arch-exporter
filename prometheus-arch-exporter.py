@@ -17,6 +17,7 @@ from pycman.config import init_with_config_and_options, init_with_config
 
 
 PORT = 9097
+USER_AGENT = 'Prometheus-Arch-Exporter/1.0'
 
 
 class PacmanConf:
@@ -59,7 +60,8 @@ def vulernablepackges():
     db = handle.get_localdb()
 
     # XXX: error handling
-    r = requests.get('https://security.archlinux.org/issues.json')
+    user_agent = {'User-Agent': USER_AGENT}
+    r = requests.get('https://security.archlinux.org/issues.json', headers=user_agent)
     advisories = r.json()
     for adv in advisories:
         version = adv['fixed']
